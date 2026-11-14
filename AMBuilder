@@ -560,6 +560,12 @@ for sdk_name in Extension.sdks:
         os.path.join(builder.currentSourcePath, 'libs', 'libluax64.a'),
         os.path.join(builder.buildPath, 'versionx64.o')
       ]
+      if cxx.target.platform == 'linux':
+        # Resolve SDK interfaces referenced by static archives; initial SDK
+        # libraries appear before those archives in AMBuild's link command.
+        binary.compiler.linkflags += [
+          '-Wl,--no-as-needed', 'libvstdlib_srv.so', 'libtier0_srv.so'
+        ]
     else:
       binary.compiler.linkdeps += builder.autoversion
       binary.compiler.linkflags += [

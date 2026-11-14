@@ -11,6 +11,7 @@
 
 #include "util/buf.h"
 #include "addr/addr.h"
+#include "mem/func_replace_jump.h"
 
 
 class IPatch
@@ -113,7 +114,13 @@ protected:
 class CFuncReplace : public CPatch
 {
 public:
-	CFuncReplace(size_t size, void *func, const char *func_name) : CPatch(size + 32), m_zFuncSize(size), m_szFuncName(func_name), m_pFunc(func) {}
+	CFuncReplace(size_t size, void *func, const char *func_name) :
+#ifdef PLATFORM_64BITS
+		CPatch(FuncReplaceJump::Size),
+#else
+		CPatch(size + 32),
+#endif
+		m_zFuncSize(size), m_szFuncName(func_name), m_pFunc(func) {}
 
 	virtual const char *GetFuncName() const override { return m_szFuncName.c_str(); }
 	virtual uint32_t GetFuncOffMin() const override  { return 0x0000; }
@@ -121,9 +128,10 @@ public:
 	
 	virtual bool GetVerifyInfo(ByteBuf& buf, ByteBuf& mask) const override
 	{
+#ifndef PLATFORM_64BITS
 		auto data = (uint8_t *) m_pFunc;
-
 		buf.CopyFrom(data);
+#endif
 		mask.SetAll(0x00);
 
 		return true;
@@ -162,12 +170,16 @@ private:
 
 // Replace original function code with provided function. Remember that:
 // 1. It must be placed outside of namespace
-// 2. The original function code + 16 byte alignment must be larger than the replacement. There is no protection against patching smaller original functions!
+// 2. The original function must have at least 14 patchable bytes on x64; on x86
+//    its code + 16 byte alignment must be larger than the copied replacement.
+//    There is no protection against patching smaller original functions!
 #define REPLACE_FUNC_STATIC(ret, name, ...) REPLACE_FUNC_STATIC_ATTRIBUTES(,ret,name,__VA_ARGS__)
 
 // Replace original function code with provided function. Remember that:
 // 1. It must be placed outside of namespace
-// 2. The original function code + 16 byte alignment must be larger than the replacement. There is no protection against patching smaller original functions!
+// 2. The original function must have at least 14 patchable bytes on x64; on x86
+//    its code + 16 byte alignment must be larger than the copied replacement.
+//    There is no protection against patching smaller original functions!
 #define REPLACE_FUNC_MEMBER(ret, name, ...) REPLACE_FUNC_MEMBER_ATTRIBUTES(,ret,name,__VA_ARGS__)
 
 // Same as REPLACE_FUNC_STATIC but the function is space optimized instead

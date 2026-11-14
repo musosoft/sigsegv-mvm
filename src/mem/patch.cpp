@@ -204,10 +204,18 @@ void *CPatch::GetActualLocation() const
 
 bool CFuncReplace::GetPatchInfo(ByteBuf& buf, ByteBuf& mask) const
 {
+#ifdef PLATFORM_64BITS
+	if (!FuncReplaceJump::Encode(buf.MPtr(), buf.GetSize(), reinterpret_cast<uintptr_t>(m_pFunc))) {
+		return false;
+	}
+	mask.SetRange(0, FuncReplaceJump::Size, 0xff);
+	return true;
+#else
 	size_t sizeCopied = CopyAndFixUpFuncBytes(this->m_zFuncSize, this->GetLength(), (uint8_t *) m_pFunc, (uint8_t *) this->GetFuncAddr(), buf.MPtr(), false);
 	if (sizeCopied == 0) {
 		ConColorMsg(Color(255, 60, 60), "Func Replace: \"%s\": copied function size larger than buffer\n", this->GetFuncName());
 	}
 	mask.SetRange(0, sizeCopied, 0xff);
 	return true;
+#endif
 }

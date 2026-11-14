@@ -19,7 +19,7 @@ parser.options.add_argument('--exclude-mods-mvm', action='store_const', const='1
 parser.options.add_argument('--optimize-mods-only', action='store_const', const='1', dest='optimize_mods_only', help='Only compile optimize mods')
 parser.options.add_argument('--build-all', action='store_const', const='1', dest='build_all', help='Build additional optimize-mods and no-mvm packages')
 parser.options.add_argument('--exclude-vgui', action='store_const', const='1', dest='exclude_mods_vgui', help='Don\'t compile any mods in the VGUI group')
-parser.options.add_argument('-s', '--sdks', default='all', dest='sdks', help='Build against specified SDKs; valid args are "all", "present", or comma-delimited list of engine names (default: %default)')
+parser.options.add_argument('-s', '--sdks', default='all', dest='sdks', help='Build against specified SDKs; valid args are "all", "present", or comma-delimited list of engine names (default: all)')
 parser.options.add_argument('--targets', type=str, dest='targets', default=None, help="Override the target architecture (use commas to separate multiple targets).")
 
 parser.Configure()

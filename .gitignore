@@ -1,4 +1,5 @@
 build/
+.slim/deepwork/
 obj-linux-x86_64/
 MSVC/Debug/
 MSVC/Release/
